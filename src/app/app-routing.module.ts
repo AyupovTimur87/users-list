@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { MainComponent } from './components/main/main.component'; 
-import { UsersListComponent } from './components/users-list/users-list.component';  
+import { MainComponent } from './components/main/main.component';
+import { UsersListComponent } from './components/users-list/users-list.component';
 import { EmptyRouteComponent } from './empty-route/empty-route.component';
 
 export const routes: Routes = [
@@ -11,11 +11,13 @@ export const routes: Routes = [
     component: MainComponent,
   },
   {
-    path: '', redirectTo: 'users-list', pathMatch: 'full'
+    path: '',
+    redirectTo: 'users-list',
+    pathMatch: 'full'
   },
   {
     path: 'users',
-    title: 'User Card', 
+    title: 'User Card',
     component: UsersListComponent
   },
   {

@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, inject } from '@angular/core';
+import { Component, Inject, inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { User } from '../../../shared/interfaces/user.interface';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -31,8 +31,14 @@ export class CreateEditUserComponent implements OnInit {
 
   public onSubmit(): void {
     if (this.myFormGroup.valid) {
-      this.dialogRef.close(this.myFormGroup.value);
-    } 
+      const formData = this.myFormGroup.value;
+      if (!this.data.isEdit) {
+        const newUser = {...formData, id: new Date().getTime()};
+        this.dialogRef.close(newUser);
+      } else {
+        this.dialogRef.close(formData );
+      }
+    }
   }
 
   public onClosed(): void {

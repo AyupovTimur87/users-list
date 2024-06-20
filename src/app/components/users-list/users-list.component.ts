@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
-import { inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { UsersService } from '../../services/users.service';
 import { User } from '../../../shared/interfaces/user.interface';
 import { CreateEditUserComponent } from '../../dialog/create-edit-user/create-edit-user.component';
+import { Store } from "@ngrx/store";
+import * as UsersActions from "../../+state/users.actions";
+import { selectInitUsers, selectLoadUsersError, selectLoadUsersSuccess } from "../../+state/users.selectors";
 
 @Component({
   selector: 'app-users-list',
@@ -11,16 +12,18 @@ import { CreateEditUserComponent } from '../../dialog/create-edit-user/create-ed
   styleUrl: './users-list.component.scss'
 })
 export class UsersListComponent {
-  public readonly usersService = inject(UsersService);
   private readonly dialog = inject(MatDialog);
-  public users$ = this.usersService.users$;
-  
+  private readonly store = inject(Store);
+  public readonly loading$ = this.store.select(selectInitUsers);
+  public readonly users$ = this.store.select(selectLoadUsersSuccess);
+  public readonly error$ = this.store.select(selectLoadUsersError);
+
   ngOnInit(): void {
-    this.usersService.loadInitialUsers();
+    this.store.dispatch(UsersActions.initUsers());
   }
 
-  public deleteUser(userToDelete: User): void {
-    this.usersService.deleteUser(userToDelete.id);
+  public deleteUser(id: number): void {
+    this.store.dispatch(UsersActions.deleteUser({id}));
   }
 
   public openAddUserDialog(): void {
@@ -31,103 +34,22 @@ export class UsersListComponent {
 
     dialogRef.afterClosed().subscribe(newUser => {
       if (newUser) {
-        this.usersService.addUser(newUser);
+        this.store.dispatch(UsersActions.addUser({userData: newUser}));
       }
     })
   }
 
   public openEditUserDialog(user: User): void {
-    const dialogRef = this.dialog.open(CreateEditUserComponent, {
+    const dialogRef = this.dialog.open<CreateEditUserComponent, { user: User, isEdit: boolean }, any>
+    (CreateEditUserComponent, {
       width: '30%',
       data: {user, isEdit: true }
     })
 
-    dialogRef.afterClosed().subscribe(editUser => {
-      if (editUser) {
-        this.usersService.editUser(editUser);
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.store.dispatch(UsersActions.editUser({userEdit: { ...user, ...result }}));
       }
     })
   }
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-  // UsersService
-  // public users: User[];
-  // public obj: string = 'title';
-
-  // public onDeleteUser(userId: number): void {
-  //   this.usersService.deleteUser(userId);
-  //   this.users = this.usersService.getUsers();
-  // }
-
-  // public onEditUser(user: any): void {
-  //   this.usersService.editUser(user);
-
-  //   const dialogRef = this.dialog.open(EditUserComponent, {
-  //     width: '250px',
-  //     data: { user: user }
-  //   });
-
-  //   dialogRef.afterClosed().subscribe(result => {
-  //     if (result) {
-  //       this.usersService.editUser(result).subscribe({
-  //         next: (res: any) => {
-  //           console.log('пользователь обновлен', res)
-  //         },
-  //         error: (err: any) => {
-  //           console.log('ошибка при обновлений пользователя', err)
-  //         }
-  //       })
-  //     }
-  //   });
-  // } 
-
-  // // MatDialog
-  // public polzovatels: Polzovatel[] = [];
-
-  // public openAddUserDialog(polzovatel?: Polzovatel): void {
-  //   const dialogRef = this.dialog.open(CreateEditUserComponent, {
-  //     width: '250px',
-  //     data: polzovatel ? polzovatel : null // Передаем пользователя, если редактируем, иначе ничего
-  //   });
-
-  //   dialogRef.afterClosed().subscribe(result => {
-  //     if (result) {
-  //       if (polzovatel) {
-  //         // Редактирование пользователя
-  //         const index = this.polzovatels.findIndex(u => u === polzovatel);
-  //         this.polzovatels[index] = result;
-  //       } else {
-  //         // Добавление нового пользователя
-  //         this.polzovatels.push(result);
-  //       }
-  //     }
-  //     // Добавьте логику добавления пользователя здесь
-  //   });
-  // }
-
 }

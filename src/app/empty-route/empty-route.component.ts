@@ -5,6 +5,4 @@ import { Component } from '@angular/core';
   templateUrl: './empty-route.component.html',
   styleUrl: './empty-route.component.scss'
 })
-export class EmptyRouteComponent {
-
-}
+export class EmptyRouteComponent { }
